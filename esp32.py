@@ -29,40 +29,6 @@ device_state = {
 
 _tick = 0
 
-def gerar_dados():
-    global _tick
-    _tick += 1
-
-    hora_simulada = (_tick * PUBLISH_INTERVAL / 3600) % 24
-    temp_base = 22 + 10 * math.sin(math.pi * (hora_simulada - 6) / 12)
-    umid_base = 65 - 20 * math.sin(math.pi * (hora_simulada - 6) / 12)
-
-    temperatura = round(temp_base + random.gauss(0, 0.5), 1)
-    umidade     = round(umid_base + random.gauss(0, 1.0), 1)
-    umidade     = max(0.0, min(100.0, umidade))
-
-    if _tick % 20 == 0:
-        temperatura = round(TEMP_ALERT_MAX + random.uniform(0.5, 3.0), 1)
-        print(f"[SIMULAÇÃO] *** Pico de temperatura: {temperatura}°C ***")
-
-    heat_index = round(
-        -8.78469475556
-        + 1.61139411    * temperatura
-        + 2.33854883889 * (umidade / 100)
-        - 0.14611605    * temperatura * (umidade / 100),
-        1
-    )
-
-    return {
-        "temperatura":        temperatura,
-        "umidade":            umidade,
-        "heat_index":         heat_index,
-        "ventilador_status":  device_state["ventilador"],
-        "alarme_status":      device_state["alarme"],
-        "alerta_temperatura": temperatura >= TEMP_ALERT_MAX,
-        "alerta_umidade":     umidade     <= UMID_ALERT_MIN,
-    }
-
 def tb_on_connect(client, userdata, flags, rc):
     msgs = {0:"Conectado", 1:"Protocolo inválido", 2:"ID inválido",
             3:"Servidor indisponível", 4:"Credenciais inválidas", 5:"Não autorizado"}
